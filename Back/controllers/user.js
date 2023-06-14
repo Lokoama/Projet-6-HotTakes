@@ -4,9 +4,12 @@ const jwt = require('jsonwebtoken')
 
 const User = require('../models/User');
 
+//Création d'un nouvel utilisateur
 exports.signup = (req, res, next) => {
+    //Hachage du mot de passe
     bcrypt.hash(req.body.password, 10)
     .then(hash => {
+    //Création d'un nouvel utilisateur que l'on sauvegarde dans la DB
         const user = new User({
             email: req.body.email,
             password : hash
@@ -18,6 +21,7 @@ exports.signup = (req, res, next) => {
     .catch(error => res.status (500))
 };
 
+//Connection d'un utilisateur si il n'est pas trouvé ou que le mdp est mauvais retourne une erreur de "Identifiant/MDP incorect"
 exports.login = (req, res, next) => {
     User.findOne({email: req.body.email})
     .then(user => {
@@ -29,6 +33,7 @@ exports.login = (req, res, next) => {
                 if (!valid) {
                     res.status(401).json({message: 'Paire identifiant/mot de passe incorrecte'})
                 } else {
+                //Quand l'authentificatioon réussit l'utilisateur à un jeton d'accès (token) pendant 24h
                     res.status(200).json ({
                         userId : user._id,
                         token : jwt.sign(

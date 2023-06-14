@@ -5,20 +5,13 @@ const multer = require ('../middleware/multer-config')
 
 const sauceCtrl = require('../controllers/sauce')
 
-// router.use((req, res, next) => {
-//     res.setHeader('Access-Control-Allow-Origin', '*');
-//     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
-//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-//     next();
-//   });
-
-
-  router.get('/', auth, sauceCtrl.getAllSauce);
-  router.post('/', auth, multer, sauceCtrl.createSauce);
-  router.get('/:id', auth, sauceCtrl.getOneSauce);
-  router.put('/:id', auth, multer, sauceCtrl.modifySauce);
-  router.delete('/:id', auth, sauceCtrl.deleteSauce);
-  router.post('/:id/like', auth, sauceCtrl.likeAndDislike);
+//Routes définit dans le '../controllers/sauce'. Les routes ont un auth qui ne permet qu'aux utilisateurs avec le bon ID d'interagir avec elles.
+router.get('/', auth, sauceCtrl.getAllSauce);
+router.post('/', auth, multer, sauceCtrl.createSauce);
+router.get('/:id', auth, sauceCtrl.getOneSauce);
+router.put('/:id', auth, multer, sauceCtrl.modifySauce);
+router.delete('/:id', auth, sauceCtrl.deleteSauce);
+router.post('/:id/like', auth, sauceCtrl.likeAndDislike);
 
 
 module.exports = router;

@@ -1,15 +1,9 @@
+//importaion du modèle sauce
 const Sauce = require('../models/Sauce');
+//importation du module fs (file systeme) pour deleteSauce afin d'utiliser la méthode fs.unlink pour supprimer une image
 const fs = require('fs');
 
-//exports.createThing = (req, res, next) => {
-// delete req.body._id;
-// const thing = new Thing({
-//   ...req.body
-// });
-// thing.save()
-//   .then(() => res.status(201).json({ message: 'Objet enregistré !'}))
-//   .catch(error => res.status(400).json({ error }));
-
+// Création d'une nouvelle sauce
 exports.createSauce = (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce);
   delete sauceObject._id;
@@ -25,12 +19,7 @@ exports.createSauce = (req, res, next) => {
     });
 };
 
-// exports.modifyThing = (req, res, next) => {
-//   Thing.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
-//     .then(() => res.status(200).json({ message: 'Objet modifié !' }))
-//     .catch(error => res.status(400).json({ error }));
-// };
-
+//Modification d'une sauce
 exports.modifySauce = (req, res, next) => {
   const sauceObject = req.file ? {
       ...JSON.parse(req.body.sauce),
@@ -38,7 +27,7 @@ exports.modifySauce = (req, res, next) => {
   } : { ...req.body };
 
   delete sauceObject._userId;
-  Thing.findOne({_id: req.params.id})
+  Sauce.findOne({_id: req.params.id})
       .then((sauce) => {
           if (sauce.userId != req.auth.userId) {
               res.status(403).json({ message : 'Not authorized'});
@@ -53,12 +42,7 @@ exports.modifySauce = (req, res, next) => {
       });
 };
 
-// exports.deleteThing = (req, res, next) => {
-//   Thing.deleteOne({ _id: req.params.id })
-//     .then(() => res.status(200).json({ message: 'Objet supprimé !' }))
-//     .catch(error => res.status(400).json({ error }));
-// };
-
+//Suppression d'une sauce
 exports.deleteSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id})
       .then(sauce => {
@@ -78,47 +62,29 @@ exports.deleteSauce = (req, res, next) => {
       });
 };
 
-
+//Permet de récupérer une sauce
  exports.getOneSauce = (req, res, next) => {
    Sauce.findOne({ _id: req.params.id })
      .then(sauce => res.status(200).json(sauce))
      .catch(error => res.status(404).json({ error }));
  };
 
+ //Permet de récupérer toute les sauces
  exports.getAllSauce = (req, res, next) => {
    Sauce.find()
      .then(sauce => res.status(200).json(sauce))
      .catch(error => res.status(400).json({ error }));
  };
  
-// exports.likeAndDislike = (req, res, next) => {
-//   Sauce.findOne({_id: req.params.id});
-//   if (like === 1) {
-//     Sauce.updateOne(
-//     { _id: req.params.id }, 
-//     { $push: { usersLiked: userId } },
-//     { $pull: { userDisliked : userId}},
-//     { $inc: {likes: +1 }})
-//     .then(sauce => res.status(200).json({ message: 'Like ajouté' }))
-//     .catch(error => res.status(500).json({error : 'like non ajouté'}));
-//   // }else if (like = 0){
-//   //   // Sauce.updateOne(
-//   //   //   { _id: req.params.id }, 
-//   //   //   { $pull: { usersLiked: userId } }),
-//   //   //   { $pull: { userDisliked : userId}},
-//   //   //   { $inc: {likes: +1 }},
-   
-//     // }else if (like === -1) {
-//     // Sauce.updateOne({ _id: req.params.id }, )
-//   }
-  
-// }
-
+ //Ajout du like et dislike
 exports.likeAndDislike = (req, res, next) => {
+// Variable "like" de la requête
   const like = req.body.like;
+//Variable qui contient l'id du user
   const userId = req.body.userId;
-
+//Cas lors d'un like
   if (like === 1) {
+//On ajoute l'id de l'utilisateur dans un tableau, incrémente de 1 la variable likes et retire l'id de l'utilisateur d'un tableau dislike. La même chose est faites pour le dislikes, sur d'autre tableau et variables.
     Sauce.updateOne(
       { _id: req.params.id },
       {
@@ -128,6 +94,7 @@ exports.likeAndDislike = (req, res, next) => {
       })
       .then(() => {res.status(200).json({ message: 'Like ajouté' });})
       .catch(error => {res.status(500).json({ error: 'Erreur lors de la mise à jour du like' });});
+//Cas lors d'un dislike
   } else if (like === -1) {
     Sauce.updateOne(
       { _id: req.params.id },
@@ -138,6 +105,7 @@ exports.likeAndDislike = (req, res, next) => {
       })
       .then(() => {res.status(200).json({ message: 'Dislike ajouté' });})
       .catch(error => {res.status(500).json({ error: 'Erreur lors de la mise à jour du dislike' });});
+//Cas lorsque le like ou dislike est annulé, ajout d'une condition pour chacun de ces cas.
     } else if (like === 0) {
       Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
@@ -151,7 +119,7 @@ exports.likeAndDislike = (req, res, next) => {
             )
               .then(() => {res.status(200).json({ message: 'Likes annulés' });})
               .catch(error => {
-                res.status(500).json({ error: "Erreur lors de l'annulation des likes" });
+                res.status(500).json({ error: "Erreur lors de l'annulation du like" });
               });
           }else if(sauce.usersDisliked.includes(userId)) {
             Sauce.updateOne(
@@ -162,7 +130,7 @@ exports.likeAndDislike = (req, res, next) => {
               }
             )
               .then(() => {res.status(200).json({ message: 'Dislikes annulés' });})
-              .catch(error => {res.status(500).json({ error: "Erreur lors de l'annulation des likes" });
+              .catch(error => {res.status(500).json({ error: "Erreur lors de l'annulation du dislike" });
               });
           }
         })

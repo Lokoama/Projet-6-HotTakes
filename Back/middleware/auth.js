@@ -1,5 +1,6 @@
 const jwt = require ('jsonwebtoken')
 
+//// Middleware d'authentification qui vérifie la validité d'un token JWT pour un utilisateur
 module.exports = (req, res, next) => {
     try {
         const token = req.headers.authorization.split(' ')[1];
